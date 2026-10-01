@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Profile {
+  id          String   @id @db.Uuid
+  username    String   @unique
+  gamerTag    String?  @unique
+  email       String?
+  description String?
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  levels      Level[]
+  posts       Post[]
+  @@map("profiles")
+}
+
+model Level {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  thumbnailUrl String?
+  creatorId    String   @db.Uuid
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  creator      Profile  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  @@index([creatorId])
+  @@index([createdAt])
+  @@map("levels")
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  title       String?
+  content     String
+  authorId    String   @db.Uuid
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  author      Profile  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("posts")
+}
